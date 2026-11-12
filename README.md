@@ -42,19 +42,18 @@ Publicly available bulk RNA-seq datasets spanning ten disease cohorts across fou
 ## Repository Structure
 
 
+## Repository Structure
+
 ```text
 Alternative-splicing-of-microexons-in-peripheral-tissues/
 ├── README.md
 ├── LICENSE
-├── environment.yml                 # Conda environment for QC & preprocessing
-├── config/
-│   └── sample_metadata.tsv         # Cohort sample manifest (sample, condition)
+├── environment.yml                     # Conda environment for QC & preprocessing
 ├── scripts/
-│   ├── 01_qc_and_trim.sh           # FastQC, fastp adapter/quality trimming, and MultiQC
-│   ├── 02_vast_align.sh            # VAST-TOOLS align wrapper across trimmed FASTQ pairs
-│   ├── 03_vast_combine.sh          # VAST-TOOLS combine to generate merged PSI inclusion tables
+│   ├── 01_qc_and_trim.sh               # FastQC, fastp adapter/quality trimming, and MultiQC
+│   ├── 02_vast_align.sh                # VAST-TOOLS align wrapper across trimmed FASTQ pairs
+│   ├── 03_vast_combine.sh              # VAST-TOOLS combine to generate merged PSI inclusion tables
 │   └── 04_differential_microexons.R    # Wilcoxon rank-sum differential PSI & exon length stratification
-└── results/                            # Output directory for QC and differential PSI tables
 ```
 
 ---
@@ -97,12 +96,12 @@ bash scripts/03_vast_combine.sh vast_align Hsa
 ```
 
 ### Step 4: Differential Microexon Analysis in R
-Filter alternative splicing events (`COMPLEX` $\in \{\text{S, C1, C2, C3, MIC, ANN}\}$), enforce non-zero variance and minimum sample coverage cutoffs per condition, compute two-sided Wilcoxon rank-sum $p$-values with Benjamini–Hochberg correction, and stratify significant events ($|\Delta\text{PSI}| > 10$, $p < 0.05$) across exon length bins (`1–15 nt`, `16–27 nt`, `28–51 nt`, and `≤ 51 nt`):
+Filter alternative splicing events (`COMPLEX` $\in \{\text{S, C1, C2, C3, MIC, ANN}\}$), enforce non-zero variance and minimum non-`NA` sample counts per condition, compute two-sided Wilcoxon rank-sum $p$-values with Benjamini–Hochberg correction, and stratify significant events ($|\Delta\text{PSI}| > 10$, $p < 0.05$) across exon length bins (`1–15 nt`, `16–27 nt`, `28–51 nt`, and `≤ 51 nt`). Supply a two-column tab-separated metadata file (`sample` and `condition`) matching the sample column headers in `INCLUSION_LEVELS_FULL*.tab`:
 
 ```bash
 Rscript scripts/04_differential_microexons.R \
   --input vast_align/INCLUSION_LEVELS_FULL-Hsa.tab \
-  --metadata config/sample_metadata.tsv \
+  --metadata sample_metadata.tsv \
   --baseline Control \
   --case Disease \
   --name cohort_wilcox \
@@ -110,7 +109,6 @@ Rscript scripts/04_differential_microexons.R \
   --cutoff_case 20 \
   --outdir results/differential_splicing
 ```
-
 ---
 
 ## Citation
