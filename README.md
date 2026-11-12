@@ -71,8 +71,9 @@ conda activate microexon-splicing
 ```
 
 ### 2. VAST-TOOLS & VASTDB Setup
-Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`hg38`). Install `vast-tools` and download the species database following the official [vast-tools repository instructions](https://github.com/vastgroup/vast-tools).
-
+Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`Hsa` / `Hs2`).
+1. Install `vast-tools` following the official [vast-tools repository instructions](https://github.com/vastgroup/vast-tools).
+2. Download the human species database (`vastdb.hsa.*.tar.gz` or `vastdb.hs2.*.tar.gz`) directly from the [CRG VASTDB Library Archive](https://vastdb.crg.eu/libs/) and extract it into your `vast-tools/VASTDB/` directory.
 ---
 
 ## Step-by-Step Execution
@@ -102,11 +103,7 @@ bash scripts/02_vast_align.sh \
 ### Step 3: Merge Cohort PSI Tables (`vast-tools combine`)
 Combine per-sample junction alignments into the master `INCLUSION_LEVELS_FULL` PSI matrix:
 ```bash
-bash scripts/03_vast_combine.sh \
-  results/vast_lung \
-  /path/to/VASTDB \
-  hg38 \
-  24
+bash scripts/03_vast_combine.sh vast_align Hsa
 ```
 
 ### Step 4: Downstream R Analysis *(Next)*
