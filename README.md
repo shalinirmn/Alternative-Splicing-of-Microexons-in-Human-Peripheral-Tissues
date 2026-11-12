@@ -79,25 +79,15 @@ Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`
 ## Step-by-Step Execution
 
 ### Step 1: Quality Control & Adapter Trimming
-After retrieving paired-end FASTQs from the project accessions above, run pre-trimming `FastQC`, adapter/low-complexity trimming via `fastp` (`-l 36`, `--average_qual 20`), and aggregate reports with `MultiQC`:
+After retrieving paired-end FASTQs from the project accessions above, run `FastQC`, adapter/low-complexity trimming via `fastp` (`-l 36`, `--average_qual 20`), and aggregate reports with `MultiQC`:
 ```bash
-bash scripts/01_qc_and_trim.sh \
-  config/sample_metadata.tsv \
-  data/raw/lung \
-  results/qc_lung \
-  24
+bash scripts/01_qc_and_trim.sh /path/to/raw_fastq results/qc_out
 ```
 
 ### Step 2: Splicing Alignment (`vast-tools align`)
-Align trimmed paired-end reads against `VASTDB` (`hg38`). Supports both sequential execution and SLURM job arrays (`sbatch --array=1-N`):
+Align trimmed paired-end reads (`*_1_trim.fq.gz` and `*_2_trim.fq.gz`) against `VASTDB` (`Hs2`):
 ```bash
-bash scripts/02_vast_align.sh \
-  config/sample_metadata.tsv \
-  results/qc_lung/fastp_out \
-  results/vast_lung \
-  /path/to/VASTDB \
-  hg38 \
-  24
+bash scripts/02_vast_align.sh results/qc_out/fastp_out vast_align
 ```
 
 ### Step 3: Merge Cohort PSI Tables (`vast-tools combine`)
@@ -107,7 +97,7 @@ bash scripts/03_vast_combine.sh vast_align Hsa
 ```
 
 ### Step 4: Downstream R Analysis *(Next)*
-R scripts for microexon length filtering (`3–27 nt`), read-coverage quality filtering, differential splicing ($\Delta\text{PSI}$), cross-tissue comparison, and figure generation will be added here.
+R scripts for microexon length filtering (`3–27 nt`), read-coverage quality filtering, differential splicing ($\Delta\text{PSI}$), cross-tissue comparison, and figure generation will be documented here.
 
 ---
 
