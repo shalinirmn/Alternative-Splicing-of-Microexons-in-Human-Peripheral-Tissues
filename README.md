@@ -41,20 +41,20 @@ Publicly available bulk RNA-seq datasets spanning ten disease cohorts across fou
 
 ## Repository Structure
 
+
 ```text
 Alternative-splicing-of-microexons-in-peripheral-tissues/
 ├── README.md
 ├── LICENSE
 ├── environment.yml                 # Conda environment for QC & preprocessing
 ├── config/
-│   └── sample_metadata.tsv         # Cohort sample manifest (GROUP, SAMPLE, READ1, READ2, ACCESSION)
+│   └── sample_metadata.tsv         # Cohort sample manifest (sample, condition)
 ├── scripts/
 │   ├── 01_qc_and_trim.sh           # FastQC, fastp adapter/quality trimming, and MultiQC
-│   ├── 02_vast_align.sh            # VAST-TOOLS align wrapper (SLURM array or sequential)
-│   └── 03_vast_combine.sh          # VAST-TOOLS combine to generate merged PSI inclusion tables
-├── example_data/                   # Subsampled toy data for local verification
-└── results/
-    └── figures/                    # Output plots
+│   ├── 02_vast_align.sh            # VAST-TOOLS align wrapper across trimmed FASTQ pairs
+│   ├── 03_vast_combine.sh          # VAST-TOOLS combine to generate merged PSI inclusion tables
+│   └── 04_differential_microexons.R    # Wilcoxon rank-sum differential PSI & exon length stratification
+└── results/                            # Output directory for QC and differential PSI tables
 ```
 
 ---
@@ -96,8 +96,20 @@ Combine per-sample junction alignments into the master `INCLUSION_LEVELS_FULL` P
 bash scripts/03_vast_combine.sh vast_align Hsa
 ```
 
-### Step 4: Downstream R Analysis *(Next)*
-R scripts for microexon length filtering (`3–27 nt`), read-coverage quality filtering, differential splicing ($\Delta\text{PSI}$), cross-tissue comparison, and figure generation will be documented here.
+### Step 4: Differential Microexon Analysis in R
+Filter alternative splicing events (`COMPLEX` $\in \{\text{S, C1, C2, C3, MIC, ANN}\}$), enforce non-zero variance and minimum sample coverage cutoffs per condition, compute two-sided Wilcoxon rank-sum $p$-values with Benjamini–Hochberg correction, and stratify significant events ($|\Delta\text{PSI}| > 10$, $p < 0.05$) across exon length bins (`1–15 nt`, `16–27 nt`, `28–51 nt`, and `≤ 51 nt`):
+
+```bash
+Rscript scripts/04_differential_microexons.R \
+  --input vast_align/INCLUSION_LEVELS_FULL-Hsa.tab \
+  --metadata config/sample_metadata.tsv \
+  --baseline Control \
+  --case Disease \
+  --name cohort_wilcox \
+  --cutoff_baseline 3 \
+  --cutoff_case 20 \
+  --outdir results/differential_splicing
+```
 
 ---
 
