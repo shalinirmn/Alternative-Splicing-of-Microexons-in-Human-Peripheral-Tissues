@@ -1,8 +1,6 @@
 # Alternative Splicing of Microexons in Human Peripheral Tissues
 
 [![bioRxiv](https://img.shields.io/badge/bioRxiv-10.64898%2F2026.05.13.725022-B31B1B?logo=arxiv&logoColor=white)](https://doi.org/10.64898/2026.05.13.725022)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Pipeline](https://img.shields.io/badge/Pipeline-Bash%20%7C%20VAST--TOOLS%20%7C%20R-2ea44f.svg)](#pipeline-overview)
 
 A reproducible bioinformatics pipeline for quantifying and characterizing **microexon (3–27 nt) alternative splicing** from bulk RNA-seq cohorts across four human peripheral tissues: **lung, kidney, colon, and liver**.
 
