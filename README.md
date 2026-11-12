@@ -71,7 +71,7 @@ conda activate microexon-splicing
 ```
 
 ### 2. VAST-TOOLS & VASTDB Setup
-Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`Hsa` / `Hs2`).
+Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`Hsa`).
 1. Install `vast-tools` following the official [vast-tools repository instructions](https://github.com/vastgroup/vast-tools).
 2. Download the human species database (`vastdb.hsa.*.tar.gz` or `vastdb.hs2.*.tar.gz`) directly from the [CRG VASTDB Library Archive](https://vastdb.crg.eu/libs/) and extract it into your `vast-tools/VASTDB/` directory.
 ---
@@ -115,6 +115,8 @@ Rscript scripts/04_differential_microexons.R \
 
 ## Citation
 
-If you use this pipeline or data in your work, please cite:
+If you use this pipeline in your work, please cite:
 
-> Raman, S., & Gupta, I. (2026). *In silico investigation of alternative splicing of microexons in human peripheral tissues*. bioRxiv. https://doi.org/10.64898/2026.05.13.725022
+> In silico investigation of alternative splicing of microexons in human peripheral tissues
+Shalini Raman, Pallavi Gupta, Ishaan Gupta
+bioRxiv 2026.05.13.725022; doi: https://doi.org/10.64898/2026.05.13.725022
