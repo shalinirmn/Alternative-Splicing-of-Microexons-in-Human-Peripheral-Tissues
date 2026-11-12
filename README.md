@@ -34,8 +34,8 @@ Publicly available bulk RNA-seq datasets spanning ten disease cohorts across fou
 | **Kidney** | Renal Cell Carcinoma | RCC | [`PRJNA704974`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA704974) | NCBI BioProject |
 | **Colon** | Colorectal Cancer | CC | [`PRJNA218851`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA218851) | NCBI BioProject |
 | **Colon** | Ulcerative Colitis | UC | [`PRJNA1019284`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1019284) | NCBI BioProject |
-| **Liver** | Hepatic Cohort 1 *(update subtype)* | — | [`PRJNA471801`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA471801) | NCBI BioProject |
-| **Liver** | Hepatic Cohort 2 *(update subtype)* | — | [`PRJNA558102`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA558102) | NCBI BioProject |
+| **Liver** | Hepatic Cellular Carcinoma | — | [`PRJNA471801`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA471801) | NCBI BioProject |
+| **Liver** | NAFLD | — | [`PRJNA558102`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA558102) | NCBI BioProject |
 
 ---
 
