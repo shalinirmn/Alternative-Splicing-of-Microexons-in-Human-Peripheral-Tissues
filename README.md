@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Pipeline](https://img.shields.io/badge/Pipeline-Bash%20%7C%20VAST--TOOLS%20%7C%20R-2ea44f.svg)](#pipeline-overview)
 
-A reproducible bioinformatics pipeline for quantifying and characterizing **microexon (3–27 nt) alternative splicing** from bulk RNA-seq cohorts across four human peripheral tissues: **liver, lung, kidney, and colon**.
+A reproducible bioinformatics pipeline for quantifying and characterizing **microexon (3–27 nt) alternative splicing** from bulk RNA-seq cohorts across four human peripheral tissues: **lung, kidney, colon, and liver**.
 
 ---
 
@@ -12,12 +12,30 @@ A reproducible bioinformatics pipeline for quantifying and characterizing **micr
 
 ```mermaid
 flowchart LR
-    A[Public SRA/ENA<br/>Bulk RNA-seq] -->|01_fetch_fastq.sh<br/>wget| B[Raw Paired-End<br/>FASTQ]
-    B -->|02_qc_and_trim.sh<br/>FastQC + fastp + MultiQC| C[Trimmed & QC'd<br/>Reads]
-    C -->|03_vast_align.sh<br/>vast-tools align| D[Chunked Junction<br/>Alignments]
-    D -->|04_vast_combine.sh<br/>vast-tools combine| E[INCLUSION_LEVELS_FULL<br/>PSI Matrix]
-    E -->|R Downstream<br/>Analysis| F[Microexon Filtering,<br/>ΔPSI & Figures]
+    A[Public GEO / SRA<br/>Bulk RNA-seq FASTQs] -->|01_qc_and_trim.sh<br/>FastQC + fastp + MultiQC| B[Trimmed & QC'd<br/>Reads]
+    B -->|02_vast_align.sh<br/>vast-tools align| C[Chunked Junction<br/>Alignments]
+    C -->|03_vast_combine.sh<br/>vast-tools combine| D[INCLUSION_LEVELS_FULL<br/>PSI Matrix]
+    D -->|R Downstream<br/>Analysis| E[Microexon Filtering,<br/>ΔPSI & Figures]
 ```
+
+---
+
+## Datasets & Project Accessions
+
+Publicly available bulk RNA-seq datasets spanning ten disease cohorts across four human peripheral tissues (**lung, kidney, colon, and liver**) were retrieved from NCBI BioProject and Gene Expression Omnibus (GEO). Sample-to-accession mappings and clinical group labels (`Disease` vs. `Control`) are documented in [`config/sample_metadata.tsv`](config/sample_metadata.tsv).
+
+| Tissue | Disease Cohort | Abbr. | Accession ID | Repository |
+| :--- | :--- | :--- | :--- | :--- |
+| **Lung** | Small Cell Lung Cancer | SCLC | [`PRJNA257389`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA257389) | NCBI BioProject |
+| **Lung** | Idiopathic Pulmonary Fibrosis | IPF | [`PRJNA358081`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA358081) | NCBI BioProject |
+| **Lung** | Chronic Obstructive Pulmonary Disease | COPD | [`PRJNA24581`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA24581) | NCBI BioProject |
+| **Lung** | Coronavirus Disease 2019 | COVID-19 | [`GSE183533`](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE183533) | NCBI GEO |
+| **Kidney** | Diabetic Nephropathy | DNE | [`PRJNA595590`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA595590) | NCBI BioProject |
+| **Kidney** | Renal Cell Carcinoma | RCC | [`PRJNA704974`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA704974) | NCBI BioProject |
+| **Colon** | Colorectal Cancer | CC | [`PRJNA218851`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA218851) | NCBI BioProject |
+| **Colon** | Ulcerative Colitis | UC | [`PRJNA1019284`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1019284) | NCBI BioProject |
+| **Liver** | Hepatic Cohort 1 *(update subtype)* | — | [`PRJNA471801`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA471801) | NCBI BioProject |
+| **Liver** | Hepatic Cohort 2 *(update subtype)* | — | [`PRJNA558102`](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA558102) | NCBI BioProject |
 
 ---
 
@@ -29,12 +47,11 @@ Alternative-splicing-of-microexons-in-peripheral-tissues/
 ├── LICENSE
 ├── environment.yml                 # Conda environment for QC & preprocessing
 ├── config/
-│   └── samples_lung_sclc.tsv       # Cohort sample manifest (GROUP, SAMPLE, READ1, READ2, URLs)
+│   └── sample_metadata.tsv         # Cohort sample manifest (GROUP, SAMPLE, READ1, READ2, ACCESSION)
 ├── scripts/
-│   ├── 01_fetch_fastq.sh           # Automated bulk FASTQ download via wget
-│   ├── 02_qc_and_trim.sh           # FastQC, fastp adapter/quality trimming, and MultiQC
-│   ├── 03_vast_align.sh            # VAST-TOOLS align wrapper (SLURM array or sequential)
-│   └── 04_vast_combine.sh          # VAST-TOOLS combine to generate merged PSI inclusion tables
+│   ├── 01_qc_and_trim.sh           # FastQC, fastp adapter/quality trimming, and MultiQC
+│   ├── 02_vast_align.sh            # VAST-TOOLS align wrapper (SLURM array or sequential)
+│   └── 03_vast_combine.sh          # VAST-TOOLS combine to generate merged PSI inclusion tables
 ├── example_data/                   # Subsampled toy data for local verification
 └── results/
     └── figures/                    # Output plots
@@ -60,27 +77,21 @@ Splicing quantification relies on `vast-tools` and the human `VASTDB` library (`
 
 ## Step-by-Step Execution
 
-### Step 1: Bulk Data Retrieval
-Download paired-end bulk RNA-seq FASTQ files defined in a cohort manifest (`config/samples_<tissue>.tsv`):
+### Step 1: Quality Control & Adapter Trimming
+After retrieving paired-end FASTQs from the project accessions above, run pre-trimming `FastQC`, adapter/low-complexity trimming via `fastp` (`-l 36`, `--average_qual 20`), and aggregate reports with `MultiQC`:
 ```bash
-bash scripts/01_fetch_fastq.sh config/samples_lung_sclc.tsv data/raw/lung
-```
-
-### Step 2: Quality Control & Adapter Trimming
-Run pre-trimming `FastQC`, adapter/low-complexity trimming via `fastp` (`-l 36`, `--average_qual 20`), and aggregate reports with `MultiQC`:
-```bash
-bash scripts/02_qc_and_trim.sh \
-  config/samples_lung_sclc.tsv \
+bash scripts/01_qc_and_trim.sh \
+  config/sample_metadata.tsv \
   data/raw/lung \
   results/qc_lung \
   24
 ```
 
-### Step 3: Splicing Alignment (`vast-tools align`)
+### Step 2: Splicing Alignment (`vast-tools align`)
 Align trimmed paired-end reads against `VASTDB` (`hg38`). Supports both sequential execution and SLURM job arrays (`sbatch --array=1-N`):
 ```bash
-bash scripts/03_vast_align.sh \
-  config/samples_lung_sclc.tsv \
+bash scripts/02_vast_align.sh \
+  config/sample_metadata.tsv \
   results/qc_lung/fastp_out \
   results/vast_lung \
   /path/to/VASTDB \
@@ -88,18 +99,18 @@ bash scripts/03_vast_align.sh \
   24
 ```
 
-### Step 4: Merge Cohort PSI Tables (`vast-tools combine`)
+### Step 3: Merge Cohort PSI Tables (`vast-tools combine`)
 Combine per-sample junction alignments into the master `INCLUSION_LEVELS_FULL` PSI matrix:
 ```bash
-bash scripts/04_vast_combine.sh \
+bash scripts/03_vast_combine.sh \
   results/vast_lung \
   /path/to/VASTDB \
   hg38 \
   24
 ```
 
-### Step 5: Downstream R Analysis *(In Progress)*
-R scripts for microexon length filtering (`3–27 nt`), read-coverage quality filtering, differential splicing ($\Delta\text{PSI}$), cross-tissue comparison, and figure generation will be documented here.
+### Step 4: Downstream R Analysis *(Next)*
+R scripts for microexon length filtering (`3–27 nt`), read-coverage quality filtering, differential splicing ($\Delta\text{PSI}$), cross-tissue comparison, and figure generation will be added here.
 
 ---
 
